@@ -26,6 +26,12 @@ export default class ImagineFinder extends Component {
     if (prevState.search !== this.state.search) {
       this.fetchImages(false);
     }
+    if (prevState.search === this.state.search) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }
 
   onSearch = (search) => {
@@ -40,7 +46,7 @@ export default class ImagineFinder extends Component {
     this.fetchImages(true);
   };
 
-  fetchImages = (scroll) => {
+  fetchImages = () => {
     this.setState({ isLoading: true });
     const { search, pageNumber } = this.state;
     fetchImagesAPI(search, pageNumber)
@@ -56,17 +62,6 @@ export default class ImagineFinder extends Component {
       })
       .finally(() => {
         this.setState({ isLoading: false });
-      })
-      .then((firstLoadedImage) => {
-        if (scroll) {
-          const { id } = firstLoadedImage;
-
-          const y =
-            document.getElementById(id).getBoundingClientRect().top +
-            window.scrollY -
-            80;
-          window.scrollTo({ top: y, behavior: "smooth" });
-        }
       });
   };
 
@@ -94,9 +89,9 @@ export default class ImagineFinder extends Component {
         <Searchbar onSubmit={this.onSearch} />
         <ImageGallery openModal={this.openModal} images={images} />
         {isLoading && <Loader />}
+        {images.length > 0 && <Button fetchImages={this.fetchMoreImages} />}
         {/* <ImageGalleryItem /> */}
 
-        <Button fetchImages={this.fetchMoreImages} />
         {isModalOpen && (
           <Modal largeImgId={largeImageId} onClose={this.closeModal}>
             <img src={this.findImg().largeImageURL} alt={this.findImg().tags} />{" "}
